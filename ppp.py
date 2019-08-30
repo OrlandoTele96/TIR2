@@ -32,8 +32,10 @@ class ppp:
         #print(pack('!BBH',self.codigos[code],ide,length).hex())
         return m
 
-    def crea_frame(self,msj):
-        pass
+    def crea_paquete(self,msj,prtcol):
+        header=pack('!BBBH',self.flag,self.address,self.control,self.protocol[prtcol])
+        final_pack=header+msj
+        print(final_pack.hex())
 
     def lee_payload(self,m):
         header=unpack('!BBH',m[:4])
@@ -44,9 +46,14 @@ class ppp:
                 tipo=c
         return tipo, header[1],datos
 
+    def search_esc(self,msj):
+        """Busca que no esté el patron la bandera en el mensaje"""
+        pass
+
 p=ppp()
-m=p.crea_payload('Configure-Nak',10,'hola')
+m=p.crea_payload('Configure-Nak',10,'Hola')
 #print(' '.join(x for x in m))
 print(m)
 print(type(m))
 print (p.lee_payload(m))
+p.crea_paquete(m,'Enlace')
