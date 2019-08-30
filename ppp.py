@@ -14,7 +14,7 @@ class ppp:
 
     def crea_p(self,code,ide,data):
         length=len(data)+4#longitud de cada cabecera en bytes
-        m=str(pack('!BBH',self.codigos[code],ide,length).hex())+data
+        m=pack('!BBH',self.codigos[code],ide,length)+bytes(data,'utf-8')
         #print(pack('!BBH',self.codigos[code],ide,length).hex())
         return m
 
@@ -29,6 +29,7 @@ class ppp:
 
 p=ppp()
 m=p.crea_p('Configure-Nak',10,'hola')
-print(' '.join(x for x in m))
+#print(' '.join(x for x in m))
 print(m)
-#print (p.lee_p(m))
+print(type(m))
+print (p.lee_p(m))
