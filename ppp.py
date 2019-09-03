@@ -38,6 +38,7 @@ class ppp:
         p=header+msj
         msj_final=self.search_esc(p)
         #print(msj_final.hex())
+        return msj_final
 
     def lee_payload(self,m):
         header=unpack('!BBH',m[:4])

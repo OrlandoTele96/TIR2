@@ -10,3 +10,7 @@ ID=int(input("type an ID : "))
 info=input("type information : ")
 
 msj_payload=p.crea_payload(code,ID,info)
+
+msj_final=p.crea_paquete(msj_payload,'Enlace')
+print(msj_final)
+#Send ack
