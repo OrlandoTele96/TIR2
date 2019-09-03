@@ -20,10 +20,10 @@ class ppp:
         self.address=255 #broadcast
         self.flag=126#bandera 01111110 en decimal
         self.control=3 #byte de control 00000011 en decimal
-        #self.pttrnescp=126
+        self.pttrnescp=125# Patron de escape 01111110 en decimal
         self.protocol={
         'Enlace' : 49185,
-        'Password-Auth' : 49187
+        'PAP' : 49187
         }
 
     def crea_payload(self,code,ide,data):
@@ -34,8 +34,10 @@ class ppp:
 
     def crea_paquete(self,msj,prtcol):
         header=pack('!BBBH',self.flag,self.address,self.control,self.protocol[prtcol])
-        final_pack=header+msj
-        print(final_pack.hex())
+        #Aplica crc16
+        p=header+msj
+        msj_final=self.search_esc(p)
+        #print(msj_final.hex())
 
     def lee_payload(self,m):
         header=unpack('!BBH',m[:4])
@@ -48,12 +50,27 @@ class ppp:
 
     def search_esc(self,msj):
         """Busca que no esté el patron la bandera en el mensaje"""
-        pass
+        mensaje=msj.hex()
+        L=len(mensaje)
+        temp=mensaje[2:L-2]
+        temp2=temp
+        msj_f=mensaje[:2]
+        flag=pack('!B',self.flag).hex()
+        patron=pack('!B',self.pttrnescp).hex()
+        act=0
+        for i in range(len(temp)):
+            pos=temp2.find(flag)
+            if pos != -1:
+                for i in range(act,pos):
+                    msj_f += temp[i]
+                act=pos
 
-p=ppp()
-m=p.crea_payload('Configure-Nak',10,'Hola')
-#print(' '.join(x for x in m))
-print(m)
-print(type(m))
-print (p.lee_payload(m))
-p.crea_paquete(m,'Enlace')
+                msj_f = msj_f +patron + temp[act:act+2]
+                temp2=temp[act+2:]
+            else:
+                msj_f=msj_f+temp2
+
+                break
+
+        msj_f=msj_f+mensaje[L-2:L]
+        return msj_f
