@@ -1,4 +1,5 @@
 from struct import*
+import crc16
 """-------------------------Terminar-----------------------------------------
 Checar el loging de ppp------------------------------------------------------"""
 class ppp:
@@ -34,8 +35,9 @@ class ppp:
 
     def crea_paquete(self,msj,prtcol):
         header=pack('!BBBH',self.flag,self.address,self.control,self.protocol[prtcol])
-        #Aplica crc16
         p=header+msj
+        crc=crc16.crc16xmodem(p)
+        p += pack('!IB',crc,self.flag)
         msj_final=self.search_esc(p)
         #print(msj_final.hex())
         return msj_final
