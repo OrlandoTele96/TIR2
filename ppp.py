@@ -36,9 +36,10 @@ class ppp:
     def crea_paquete(self,msj,prtcol):
         header=pack('!BBBH',self.flag,self.address,self.control,self.protocol[prtcol])
         p=header+msj
+        print(p)
         crc=crc16.crc16xmodem(p)
         p += pack('!IB',crc,self.flag)
-        msj_final=self.search_esc(p)
+        msj_final=self.get_esc(p)
         #print(msj_final.hex())
         return msj_final
 
@@ -51,8 +52,8 @@ class ppp:
                 tipo=c
         return tipo, header[1],datos
 
-    def search_esc(self,msj):
-        """Busca que no esté el patron la bandera en el mensaje"""
+    def get_esc(self,msj):
+        """Pone el patron de escpa"""
         mensaje=msj.hex()
         L=len(mensaje)
         temp=mensaje[2:L-2]
@@ -77,3 +78,29 @@ class ppp:
 
         msj_f=msj_f+mensaje[L-2:L]
         return msj_f
+
+    def Unpack_msj(self,msj):
+        self.flag=unpack('!B',bytes.fromhex(msj[:2]))[0]
+        self.address=unpack('!B',bytes.fromhex(msj[2:4]))
+        self.control=unpack('!B',bytes.fromhex(msj[4:6]))
+        protocol=unpack('!H',bytes.fromhex(msj[6:10]))[0]
+        temp=msj[10:]
+        msj_out=self.lee_payload(bytes.fromhex(temp))
+        return msj_out
+
+
+    def quit_ptrnesc(self,msj):
+        L=len(msj)
+        temp=msj
+        patron=pack('!B',self.pttrnescp).hex()
+        for i in range(L):
+            pos=temp.find(patron)
+            if pos != -1:
+                msj_out=temp[:pos]
+                print("primera parte",msj_out)
+                msj_out +=temp[pos+2:]
+                print("sin patron",msj_out)
+                temp=msj_out
+            else:
+                break
+        return msj_out
